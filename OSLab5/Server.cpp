@@ -21,9 +21,9 @@ DWORD WINAPI InstanceThread(LPVOID param) {
         fSuccess = ReadFile(hPipe, &command, sizeof(command), &dwBytesRead, NULL);
         if (!fSuccess || dwBytesRead == 0) {
             if (GetLastError() == ERROR_BROKEN_PIPE)
-                cout << "InstanceThread: клиент отключен." << endl;
+                cout << "InstanceThread: client is off." << endl;
             else
-                cout << "InstanceThread: ошибка ReadFile, GLE: " << GetLastError() << endl;
+                cout << "InstanceThread: ReadFile error, GLE: " << GetLastError() << endl;
             break;
         }
 
@@ -36,7 +36,7 @@ DWORD WINAPI InstanceThread(LPVOID param) {
 
             fSuccess = ReadFile(hPipe, &empNum, sizeof(empNum), &dwBytesRead, NULL);
             if (!fSuccess || dwBytesRead == 0) {
-                cout << "InstanceThread: ошибка ReadFile, GLE: " << GetLastError() << endl;
+                cout << "InstanceThread: ReadFile error, GLE: " << GetLastError() << endl;
                 break;
             }
 
@@ -50,14 +50,14 @@ DWORD WINAPI InstanceThread(LPVOID param) {
 
             fSuccess = WriteFile(hPipe, &found, sizeof(bool), &dwBytesWrote, NULL);
             if (!fSuccess || dwBytesWrote == 0) {
-                cout << "InstanceThread: ошибка WriteFile, GLE: " << GetLastError() << endl;
+                cout << "InstanceThread: WriteFile error, GLE: " << GetLastError() << endl;
                 break;
             }
 
             if (found) {
                 fSuccess = WriteFile(hPipe, &emps[fEmpNum], sizeof(Employee), &dwBytesWrote, NULL);
                 if (!fSuccess || dwBytesWrote == 0) {
-                    cout << "InstanceThread: ошибка WriteFile, GLE: " << GetLastError() << endl;
+                    cout << "InstanceThread: WriteFile error, GLE: " << GetLastError() << endl;
                     break;
                 }
             }
@@ -72,7 +72,7 @@ DWORD WINAPI InstanceThread(LPVOID param) {
             WaitForSingleObject(hSemaphore, INFINITE);
             fSuccess = ReadFile(hPipe, &empNum, sizeof(empNum), &dwBytesRead, NULL);
             if (!fSuccess || dwBytesRead == 0) {
-                cout << "InstanceThread: ошибка ReadFile, GLE: " << GetLastError() << endl;
+                cout << "InstanceThread: ReadFile error, GLE: " << GetLastError() << endl;
                 break;
             }
 
@@ -86,20 +86,20 @@ DWORD WINAPI InstanceThread(LPVOID param) {
 
             fSuccess = WriteFile(hPipe, &found, sizeof(bool), &dwBytesWrote, NULL);
             if (!fSuccess || dwBytesWrote == 0) {
-                cout << "InstanceThread: ошибка WriteFile, GLE: " << GetLastError() << endl;
+                cout << "InstanceThread: WriteFile error, GLE: " << GetLastError() << endl;
                 break;
             }
 
             if (found) {
                 fSuccess = WriteFile(hPipe, &emps[fEmpNum], sizeof(Employee), &dwBytesWrote, NULL);
                 if (!fSuccess || dwBytesWrote == 0) {
-                    cout << "InstanceThread: ошибка WriteFile, GLE: " << GetLastError() << endl;
+                    cout << "InstanceThread: WriteFile error, GLE: " << GetLastError() << endl;
                     break;
                 }
 
                 fSuccess = ReadFile(hPipe, &emps[fEmpNum], sizeof(Employee), &dwBytesRead, NULL);
                 if (!fSuccess || dwBytesRead == 0) {
-                    cout << "InstanceThread: ошибка ReadFile, GLE: " << GetLastError() << endl;
+                    cout << "InstanceThread: ReadFile error, GLE: " << GetLastError() << endl;
                     break;
                 }
             }
@@ -110,34 +110,33 @@ DWORD WINAPI InstanceThread(LPVOID param) {
 
     DisconnectNamedPipe(hPipe);
     CloseHandle(hPipe);
-    cout << "Поток завершил свою работу." << endl;
+    cout << "Handle finished." << endl;
     return 1;
 }
 
 int main()
 {
-    setlocale(LC_ALL, "rus");
     PROCESS_INFORMATION pi;
     STARTUPINFOW cb;
     wchar_t commandLine[] = L"Client.exe";
     int kolofclients, readerCount = 0;
 
-    cout << "Введите количество студентов: ";
+    cout << "Enter number of students: ";
     cin >> empsNum;
     emps = new Employee[empsNum];
 
-    cout << "Введите данные о студенте (номер, имя, часы):" << endl;
+    cout << "Enter student data (number, name, hours):" << endl;
     for (int i = 0; i < empsNum; i++) {
-        cout << "Данные " << i + 1 << "-го студента:" << endl;
-        cout << "номер: ";
+        cout << "Student " << i + 1 << " data:" << endl;
+        cout << "number: ";
         cin >> emps[i].num;
-        cout << "имя: ";
+        cout << "name: ";
         cin >> emps[i].name;
-        cout << "часы: ";
+        cout << "hours: ";
         cin >> emps[i].hours;
     }
 
-    cout << "Введите количество клиентов: ";
+    cout << "Enter number of clients: ";
     cin >> kolofclients;
 
     hSemaphore = CreateSemaphore(NULL, 1, kolofclients, "WriteSempahore");
@@ -156,7 +155,7 @@ int main()
             INFINITE,
             NULL);
         if (hPipe == INVALID_HANDLE_VALUE) {
-            cout << "Не удалось создать трубу " << i + 1 << ", GLE: " << GetLastError() << endl;
+            cout << "Failed to create pipe " << i + 1 << ", GLE: " << GetLastError() << endl;
             return -1;
         }
 
@@ -164,17 +163,17 @@ int main()
         cb.cb = sizeof(STARTUPINFOW);
         if (!CreateProcessW(NULL, commandLine, NULL, NULL, FALSE, CREATE_NEW_CONSOLE,
             NULL, NULL, &cb, &pi)) {
-            cout << "Не удалось создать процесс " << i + 1 << "." << endl;
+            cout << "Failed to create process " << i + 1 << "." << endl;
             break;
         }
         CloseHandle(pi.hThread);
         CloseHandle(pi.hProcess);
 
         if (ConnectNamedPipe(hPipe, NULL)) {
-            cout << "Клиент " << i + 1 << " подключен." << endl;
+            cout << "Client " << i + 1 << " connected." << endl;
             hThreads[i] = CreateThread(NULL, 0, InstanceThread, (LPVOID)hPipe, 0, &dwThreadId);
             if (hThreads[i] == 0) {
-                cout << "Не удалось создать поток " << i + 1 << "." << endl;
+                cout << "Failed to create thread " << i + 1 << "." << endl;
                 return -1;
             }
         }

@@ -6,9 +6,6 @@ using namespace std;
 
 int main()
 {
-    setlocale(LC_ALL, "rus");
-
-
     char command[20];
     int data;
     Employee emp;
@@ -28,104 +25,104 @@ int main()
     );
 
     if (hServer == INVALID_HANDLE_VALUE) {
-        cout << "Ошибка открытия" << endl;
+        cout << "Open error" << endl;
         return 1;
     }
 
     while (true) {
 
-        cout << endl << "Введите команду (read, write или exit): ";
+        cout << endl << "Enter sonething (read, write или exit): ";
         cin >> command;
 
         if (strcmp(command, "exit") == 0) {
-            cout << "Завершение работы" << endl;
+            cout << "The end." << endl;
             break;
         }
 
         if (!WriteFile(hServer, &command, sizeof(command), &dw, NULL)) {
-            cerr << "Ошибка записи" << endl;
+            cerr << "Failed to write" << endl;
             return 1;
         }
 
         if (strcmp(command, "read") == 0) {
-            cout << "Введите номер студента для чтения: ";
+            cout << "Enter student number to read: ";
             cin >> data;
 
             if (!WriteFile(hServer, &data, sizeof(data), &dw, NULL)) {
-                cerr << "Ошибка записи" << endl;
+                cerr << "Failed to write" << endl;
                 return 1;
             }
 
             if (!ReadFile(hServer, &b, sizeof(bool), &dw, NULL)) {
-                cerr << "Ошибка чтения" << endl;
+                cerr << "Failed to read" << endl;
                 CloseHandle(hServer);
                 return 1;
             }
 
             if (b == false) {
-                cout << "Такого студента нет" << endl;
+                cout << "No student" << endl;
                 continue;
             }
             else {
                 if (!ReadFile(hServer, &emp, sizeof(emp), &dw, NULL)) {
-                    cerr << "Ошибка чтения" << endl;
+                    cerr << "Failed to read" << endl;
                     CloseHandle(hServer);
                     return 1;
                 }
-                cout << "Данные студента:\n";
-                cout << "Номер: " << emp.num << "\n";
-                cout << "Имя: " << emp.name << "\n";
-                cout << "Часы: " << emp.hours << "\n";
+                cout << "Student data:\n";
+                cout << "Number: " << emp.num << "\n";
+                cout << "Name: " << emp.name << "\n";
+                cout << "Hours: " << emp.hours << "\n";
             }
 
 
         }
         else if (strcmp(command, "write") == 0) {
-            cout << "Введите номер студента для записи: ";
+            cout << "Enter student number to write ";
             cin >> data;
 
             if (!WriteFile(hServer, &data, sizeof(data), &dw, NULL)) {
-                cerr << "Ошибка записи" << endl;
+                cerr << "Failed to write" << endl;
                 return 1;
             }
 
             if (!ReadFile(hServer, &b, sizeof(bool), &dw, NULL)) {
-                cerr << "Ошибка чтения" << endl;
+                cerr << "Failed to read" << endl;
                 CloseHandle(hServer);
                 return 1;
             }
 
             if (b == false) {
-                cout << "Такого студента нет" << endl;
+                cout << "No student" << endl;
                 continue;
             }
             else {
                 if (!ReadFile(hServer, &emp, sizeof(emp), &dw, NULL)) {
-                    cerr << "Ошибка чтения" << endl;
+                    cerr << "Failed to read" << endl;
                     CloseHandle(hServer);
                     return 1;
                 }
 
-                cout << "Данные студента:\n";
-                cout << "Номер: " << emp.num << "\n";
-                cout << "Имя: " << emp.name << "\n";
-                cout << "Часы: " << emp.hours << "\n";
+                cout << "Student data:\n";
+                cout << "Number: " << emp.num << "\n";
+                cout << "Name: " << emp.name << "\n";
+                cout << "Hours: " << emp.hours << "\n";
 
-                cout << "Введите новые данные студента c номером: " << emp.num;
+                cout << "Enter new data for student: " << emp.num;
                 cout << endl;
-                cout << "имя: ";
+                cout << "name: ";
                 cin >> emp.name;
-                cout << "часы: ";
+                cout << "hours: ";
                 cin >> emp.hours;
 
 
 
                 if (!WriteFile(hServer, &emp, sizeof(emp), &dw, NULL)) {
-                    cerr << "Ошибка записи" << endl;
+                    cerr << "Failed to write" << endl;
                     return 1;
                 }
 
-                cout << "Данные успешно записаны";
+                cout << "Data updated";
             }
 
 
